@@ -45,6 +45,7 @@ import (
 // Client is a client for interacting with a GraphQL API.
 type Client struct {
 	endpoint         string
+	host             string
 	httpClient       *http.Client
 	useMultipartForm bool
 
@@ -118,6 +119,7 @@ func (c *Client) runWithJSON(ctx context.Context, req *Request, resp interface{}
 		return err
 	}
 	r.Close = c.closeReq
+	r.Host = c.host
 	r.Header.Set("Content-Type", "application/json; charset=utf-8")
 	r.Header.Set("Accept", "application/json; charset=utf-8")
 	for key, values := range req.Header {
@@ -189,6 +191,7 @@ func (c *Client) runWithPostFields(ctx context.Context, req *Request, resp inter
 		return err
 	}
 	r.Close = c.closeReq
+	r.Host = c.host
 	r.Header.Set("Content-Type", writer.FormDataContentType())
 	r.Header.Set("Accept", "application/json; charset=utf-8")
 	for key, values := range req.Header {
@@ -242,6 +245,13 @@ func UseMultipartForm() ClientOption {
 func ImmediatelyCloseReqBody() ClientOption {
 	return func(client *Client) {
 		client.closeReq = true
+	}
+}
+
+// SetHost sets the Host field of any http.Request created.
+func SetHost(host string) ClientOption {
+	return func(client *Client) {
+		client.host = host
 	}
 }
 
